@@ -81,15 +81,31 @@ public class CustomTree<T> {
         return depth;
     }
 
+    public int getNodeDepth() {
+        if (this.PARENT == null) {
+            return 0;
+        } else {
+            return this.PARENT.getNodeDepth() + 1;
+        }
+    }
+
+    public boolean isLeaf() {
+        return this.getNbChildren() > 0;
+    }
+
     public void setParent(CustomTree<T> parent) {
         this.PARENT = parent;
     }
     
-    public CustomTree<T> addChild(T label) {
-        CustomTree<T> child = new CustomTree<T>(label);
-        child.setParent(this);
-        this.CHILDREN.add(child);
-        return child;
+    public CustomTree<T> addChild(T label)
+    throws IOException {
+        if (!this.contains(label, false)) {
+            CustomTree<T> child = new CustomTree<T>(label);
+            child.setParent(this);
+            this.CHILDREN.add(child);
+            return child;
+        }
+        throw new IOException("Label " + label + " not unique among children!");
     }
 
     public String getDisplaySeparator() {
@@ -101,7 +117,7 @@ public class CustomTree<T> {
     }
 
     public void display(boolean displayLeaf) {
-        if (this.getNbChildren() > 0 || displayLeaf) {
+        if (isLeaf() || displayLeaf) {
             String lineToDisplay = this.getLabel() + ": [";
             for (int index = 0; index < this.getNbChildren(); index++) {
                 if (index > 0) {
@@ -115,5 +131,50 @@ public class CustomTree<T> {
                 this.CHILDREN.get(index).display(displayLeaf);
             }
         }
+    }
+
+    private CustomTree<T> nextNotChild() {
+        if (this.PARENT != null) {
+            for (int index = 0; index < this.PARENT.getNbChildren(); index++) {
+                if (this.PARENT.getChildren().get(index).getLabel().equals(this.getLabel())) {
+                    if (index + 1 == this.PARENT.getNbChildren()) {
+                        return this.PARENT.nextNotChild();
+                    } else {
+                        return this.PARENT.getChildren().get(index+1);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean hasNext() {
+        boolean fail = this.isLeaf() && this.nextNotChild() == null;
+        return !fail;
+    }
+
+    public CustomTree<T> nextDepthFirst() {
+        if (!this.isLeaf()) {
+            return this.getChildren().get(0);
+        } else {
+            return this.nextNotChild();
+        }
+    }
+
+    public CustomTree<T> nextBreadthFirst() {
+        CustomTree<T> potential = this.nextNotChild();
+        while (potential != null && potential.getNodeDepth() < this.getNodeDepth()) {
+            if (potential.isLeaf()) {
+                potential = potential.nextNotChild();
+            } else {
+                potential = potential.getChildren().get(0);
+            }
+        }
+        if (potential == null) {
+            if (!this.isLeaf()) {
+                return this.CHILDREN.get(0);
+            }
+        }
+        return potential;
     }
 }
