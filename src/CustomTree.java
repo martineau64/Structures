@@ -131,9 +131,33 @@ public class CustomTree<T> {
      * Returns if the node DOES NOT have children (leaf).
      */
     public boolean isLeaf() {
-        return this.getNbChildren() > 0;
+        return this.getNbChildren() == 0;
     }
 
+    /**
+     * Adds a parent to the node which is NOT the root anymore.
+     * @param parent
+     */
+    public void setLabel(T label)
+    throws IOException {
+        if (label == null) {
+            throw new IOException("Can't set label with null value!");
+        }
+        boolean neighborLabel = label.equals(this.LABEL);
+        if (this.PARENT != null) {
+            for (int index = 0; index < this.PARENT.getNbChildren(); index++) {
+                if (label.equals(this.PARENT.getChildren().get(index).getLabel())) {
+                    neighborLabel = true;
+                }
+            }
+        }
+        if (neighborLabel) {
+            throw new IOException("This label already exists!");
+        } else {
+            this.LABEL = label;
+        }
+    }
+    
     /**
      * Adds a parent to the node which is NOT the root anymore.
      * @param parent
@@ -156,7 +180,7 @@ public class CustomTree<T> {
             this.CHILDREN.add(child);
             return child;
         }
-        throw new IOException("Label " + label + " not unique among children!");
+        throw new IOException("Label " + label + " not unique among children of " + this.getLabel() + "!");
     }
 
     /**
@@ -180,7 +204,7 @@ public class CustomTree<T> {
      * @param displayLeaf Displays a node if it's a leaf.
      */
     public void display(boolean displayLeaf) {
-        if (isLeaf() || displayLeaf) {
+        if (!isLeaf() || displayLeaf) {
             String lineToDisplay = this.getLabel() + ": [";
             for (int index = 0; index < this.getNbChildren(); index++) {
                 if (index > 0) {
@@ -232,7 +256,7 @@ public class CustomTree<T> {
     public CustomTree<T> nextDepthFirst() {
         if (!this.isLeaf()) {
             return this.getChildren().get(0);
-        } else {
+        } else { 
             return this.nextNotChild();
         }
     }

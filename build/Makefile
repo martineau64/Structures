@@ -1,16 +1,15 @@
 all:
 	javac -d ../lib ../src/*.java
-	javac -cp ../lib -d ../target ../test/*/*
+	javac -cp ../lib:../sourcelib -d ../target ../test/*
 
 doc:
 	javadoc -d ../doc ../src/*
 
 test:
-	java -cp ../target:../lib TestCustomTree
-	# Add Unit Testing: java -cp ../target:../lib [TestName]
+	java -cp ../target:../lib:../sourcelib TestCustomTree
 
 clean:
 	rm -f *.class
-	rm -f -R ../doc/*
-	rm -f -R ../lib/*
-	rm -f -R ../target/*
+	rm -rf ../doc/*
+	rm -rf ../lib/*
+	rm -rf ../target/*
